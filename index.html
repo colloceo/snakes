@@ -37,7 +37,7 @@
     margin: 28px auto;
     padding: 18px;
     display: grid;
-    grid-template-columns: 1fr 380px;
+    grid-template-columns: 1fr;
     gap: 18px;
     align-items: start;
   }
@@ -110,8 +110,7 @@
   .highlight-burst { position: absolute; pointer-events: none; border-radius: 999px; box-shadow: 0 6px 28px rgba(255,255,255,0.12); opacity: 0; transform: scale(0.85); transition: opacity 260ms, transform 260ms; }
 
   @media (max-width: 800px) {
-    .wrap { grid-template-columns: 1fr; gap: 14px; padding: 8px; }
-    .controls { order: -1; }
+    .wrap { gap: 14px; padding: 8px; }
     .board { width: 100%; height: auto; aspect-ratio: 1 / 1; }
   }
 </style>
@@ -150,9 +149,8 @@
         <div id="winnerBanner" class="winner-banner">Winner!</div>
         <div id="burst" class="highlight-burst" style="width:120px;height:120px;left:50%;top:50%;transform:translate(-50%,-50%)"></div>
       </div>
-    </div>
 
-    <aside class="card controls">
+      <div class="controls" style="margin-top: 20px;">
       <div style="display:flex;align-items:center;justify-content:space-between">
         <div>
           <div style="font-weight:900;font-size:18px">Controls</div>
@@ -200,7 +198,7 @@
           <li>If you land on a snake head, slide to its tail.</li>
         </ul>
       </div>
-    </aside>
+    </div>
   </div>
 </div>
 
