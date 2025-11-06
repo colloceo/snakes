@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />  
+<title>Snakes & Ladders</title>
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" type="image/jpeg" href="./favicon1.jpeg">  
+
+<style>
+  :root {
+    --bg1: #071026;
+    --bg2: #081329;
+    --glass: rgba(255,255,255,0.04);
+    --muted: rgba(255,255,255,0.7);
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    height: 100%;
+    margin: 0;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    background: linear-gradient(180deg, var(--bg1), var(--bg2));
+    color: #e8f0ff;
+    overflow-x: hidden;  
+    overflow-y: auto;
+  }
+  .game-wrapper {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .wrap {
+    width: 100%;
+    max-width: 1180px;
+    margin: 28px auto;
+    padding: 18px;
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 18px;
+    align-items: start;
+  }
+  .card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius: 14px;
+    padding: 12px;
+    border: 1px solid rgba(255,255,255,0.03);
+    box-shadow: 0 8px 30px rgba(2,6,23,0.6);
+  }
+  .title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .title h1 { font-size: 20px; margin: 0; }
+  .subtitle { font-size: 13px; color: var(--muted); }
+  .board-wrap { position: relative; padding: 10px; }
+  .board {
+    width: 720px;
+    height: 720px;
+    max-width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    border: 6px solid rgba(255,255,255,0.04);
+    background: #000;
+    box-shadow: 0 18px 40px rgba(2,6,23,0.6);
+  }
+  .board img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: contrast(1.02) saturate(1.05);
+  }
+  .grid { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(10,1fr); grid-template-rows: repeat(10,1fr); pointer-events: none; }
+  .cell .idx { display: none; }
+  .token {
+    position: absolute;
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: 900;
+    box-shadow: 0 10px 28px rgba(2,6,23,0.6);
+    border: 3px solid rgba(255,255,255,0.9);
+    transform: translate(-50%,-50%);
+    transition: left 420ms cubic-bezier(.2,.9,.3,1), top 420ms cubic-bezier(.2,.9,.3,1), transform 420ms;
+  }
+  .token.blue { background: linear-gradient(180deg,#3b82f6,#2563eb); }
+  .token.red { background: linear-gradient(180deg,#fb7185,#ef4444); }
+  .token .label { font-size: 13px; letter-spacing: 0.5px; }
+  .controls { display: flex; flex-direction: column; gap: 12px; }
+  .dice {
+    width: 120px; height: 120px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; font-weight: 900; color: white;
+    cursor: pointer; user-select: none;
+    border: 4px solid rgba(255,255,255,0.05);
+    box-shadow: 0 14px 40px rgba(2,6,23,0.6);
+    transition: transform .9s cubic-bezier(.22,.9,.3,1);
+  }
+  .dice.rolling { transform: rotate(720deg) scale(1.02); }
+  .dice .small { font-size: 13px; opacity: 0.95; }
+  .meta { display: flex; gap: 8px; align-items: center; }
+  .pill { padding: 8px 10px; border-radius: 999px; background: rgba(255,255,255,0.03); font-weight: 700; }
+  .log { background: rgba(255,255,255,0.02); padding: 10px; border-radius: 10px; max-height: 180px; overflow: auto; font-size: 13px; }
+  .donate { background: linear-gradient(90deg,#fff7ed,#fff1e6); color: #1f2937; padding: 12px; border-radius: 10px; }
+  .donate .till { font-weight: 900; font-size: 20px; }
+  .copy { background: #f59e0b; padding: 8px 12px; border-radius: 10px; border: none; cursor: pointer; font-weight: 800; }
+  .small-muted { font-size: 12px; color: rgba(255,255,255,0.75); }
+  .btn { padding: 8px 10px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.03); cursor: pointer; color: white; }
+  .winner-banner { position: absolute; left: 50%; top: 12px; transform: translateX(-50%); padding: 10px 18px; border-radius: 999px; background: linear-gradient(90deg,#fef3c7,#fde68a); color: #111; font-weight: 900; display: none; z-index: 60; }
+  .highlight-burst { position: absolute; pointer-events: none; border-radius: 999px; box-shadow: 0 6px 28px rgba(255,255,255,0.12); opacity: 0; transform: scale(0.85); transition: opacity 260ms, transform 260ms; }
+
+  @media (max-width: 800px) {
+    .wrap { grid-template-columns: 1fr; gap: 14px; padding: 8px; }
+    .controls { order: -1; }
+    .board { width: 100%; height: auto; aspect-ratio: 1 / 1; }
+  }
+</style>
+</head>
+<body>
+
+<div id="modeSelect" style="
+  position:fixed;inset:0;background:rgba(7,16,38,0.95);
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;z-index:100;color:white;text-align:center;
+">
+  <h1 style="margin-bottom:20px;font-size:26px;">Choose Game Mode</h1>
+  <button class="btn" id="vsComputerBtn" style="padding:12px 20px;margin:8px;">1 Player (vs Computer)</button>
+  <button class="btn" id="twoPlayersBtn" style="padding:12px 20px;margin:8px;">2 Players</button>
+</div>
+
+<div class="game-wrapper">
+  <div class="wrap">
+    <div class="card board-wrap">
+      <div class="title">
+        <div>
+          <h1>Snakes & Ladders</h1>
+          <div class="subtitle">Blue vs Red — First to reach square 100 wins</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button id="resetBtn" class="btn">Reset</button>
+          <div id="movesCount" class="small-muted">Moves: 0</div>
+        </div>
+      </div>
+
+      <div class="board" id="board">
+        <img src="./snakes.jpg" alt="Snakes & Ladders board" id="boardImg" crossorigin="anonymous" />
+        <div id="grid" class="grid"></div>
+        <div id="token-blue" class="token blue"><div class="label">B</div></div>
+        <div id="token-red" class="token red"><div class="label">R</div></div>
+        <div id="winnerBanner" class="winner-banner">Winner!</div>
+        <div id="burst" class="highlight-burst" style="width:120px;height:120px;left:50%;top:50%;transform:translate(-50%,-50%)"></div>
+      </div>
+    </div>
+
+    <aside class="card controls">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-weight:900;font-size:18px">Controls</div>
+          <div class="small-muted">Click dice to roll. Dice color = current player.</div>
+        </div>
+        <div id="turnBadge" class="pill">Turn: <span id="turnName">Blue</span></div>
+      </div>
+
+      <div style="display:flex;gap:12px;align-items:center; margin-top:6px">
+        <div id="dice" class="dice" title="Click to roll">
+          <div style="text-align:center">
+            <div class="small">Roll</div>
+            <div id="diceVal" style="font-size:26px">—</div>
+          </div>
+        </div>
+
+        <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+          <div class="meta">
+            <div class="pill" id="blueStat">Blue: 0</div>
+            <div class="pill" id="redStat">Red: 0</div>
+          </div>
+          <div class="log" id="log">No moves yet</div>
+        </div>
+      </div>
+
+      <div style="margin-top:10px">
+        <div class="donate">
+          <div style="font-weight:800">Support Us (M-Pesa)</div>
+          <div style="margin-top:8px; display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <div style="font-size:13px">Till number</div>
+              <div class="till">4770632</div>
+            </div>
+            <div><button id="copyBtn" class="copy">Copy</button></div>
+          </div>
+          <div style="margin-top:8px;font-size:12px;color:#111">Use Lipa na M-Pesa → Buy Goods and Services.</div>
+        </div>
+      </div>
+
+      <div style="margin-top:10px">
+        <div style="font-weight:800">Rules & Notes</div>
+        <ul style="font-size:13px;margin:8px 0 0 18px">
+          <li>Roll 1–6, move forward square by square.</li>
+          <li>If you land at bottom of ladder, climb to its top.</li>
+          <li>If you land on a snake head, slide to its tail.</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+  const BOARD_SIZE = 10;
+  const gridEl = document.getElementById('grid');
+  const cells = [];
+  for (let r = 0; r < BOARD_SIZE; r++) {
+    for (let c = 0; c < BOARD_SIZE; c++) {
+      const div = document.createElement('div');
+      div.className = 'cell';
+      const idx = document.createElement('div');
+      idx.className = 'idx';
+      const number = calcCellNumber(r, c);
+      idx.textContent = number;
+      div.appendChild(idx);
+      div.dataset.num = number;
+      gridEl.appendChild(div);
+      cells[number] = div;
+    }
+  }
+  function calcCellNumber(row, col) {
+    const rFromBottom = (BOARD_SIZE - 1) - row;
+    const base = rFromBottom * BOARD_SIZE;
+    return rFromBottom % 2 === 0 ? base + col + 1 : base + (BOARD_SIZE - col);
+  }
+
+  const board = document.getElementById('board');
+  function getCellCenter(num) {
+    const rect = board.getBoundingClientRect();
+    if (!cells[num]) return { x: rect.width * 0.05, y: rect.height * 0.95 };
+    const crect = cells[num].getBoundingClientRect();
+    const x = crect.left - rect.left + crect.width / 2;
+    const y = crect.top - rect.top + crect.height / 2;
+    return { x, y };
+  }
+
+
+  const LADDERS = { 3: 45, 8: 12, 14: 26, 21: 39, 31: 73, 59: 80, 90: 92, 83: 97 };
+  const SNAKES = { 99: 41, 95: 67, 89: 85, 57: 2, 54: 27, 11: 6 };
+
+  let positions = [0, 0];
+  let currentPlayer = 0;
+  let moves = 0;
+  let mode = "2p"; 
+
+  const tokenBlue = document.getElementById('token-blue'),
+        tokenRed  = document.getElementById('token-red'),
+        dice      = document.getElementById('dice'),
+        diceVal   = document.getElementById('diceVal'),
+        turnName  = document.getElementById('turnName'),
+        blueStat  = document.getElementById('blueStat'),
+        redStat   = document.getElementById('redStat'),
+        logEl     = document.getElementById('log'),
+        movesCountEl = document.getElementById('movesCount'),
+        winnerBanner = document.getElementById('winnerBanner'),
+        burst     = document.getElementById('burst'),
+        resetBtn  = document.getElementById('resetBtn');
+
+  const modeSelect = document.getElementById('modeSelect');
+  const vsComputerBtn = document.getElementById('vsComputerBtn');
+  const twoPlayersBtn = document.getElementById('twoPlayersBtn');
+
+  vsComputerBtn.addEventListener('click', () => {
+    mode = "cpu";
+    if (modeSelect) modeSelect.style.display = 'none';
+    currentPlayer = 0;
+    updateTurn();
+    alert("You are Blue. Computer is Red.");
+  });
+
+  twoPlayersBtn.addEventListener('click', () => {
+    mode = "2p";
+    if (modeSelect) modeSelect.style.display = 'none';
+    currentPlayer = 0;
+    updateTurn();
+    alert("Two Player Mode — Blue starts!");
+  });
+
+  setDiceColor();
+  updateStats();
+  placeToken('blue', 0);
+  placeToken('red', 0);
+
+  function placeToken(which, num) {
+    const el = which === 'blue' ? tokenBlue : tokenRed;
+    const { x, y } = num > 0 ? getCellCenter(num) : { x: board.clientWidth * (which === 'blue' ? 0.08 : 0.14), y: board.clientHeight * 0.95 };
+    el.style.left = x + 'px';
+    el.style.top  = y + 'px';
+  }
+  window.addEventListener('resize', () => { placeToken('blue', positions[0]); placeToken('red', positions[1]); });
+
+  async function animatePath(playerIndex, pathNums) {
+    const el = playerIndex === 0 ? tokenBlue : tokenRed;
+    for (let n of pathNums) {
+      const { x, y } = n > 0 ? getCellCenter(n) : { x: board.clientWidth * (playerIndex === 0 ? 0.08 : 0.14), y: board.clientHeight * 0.95 };
+      el.style.transform = 'translate(-50%,-60%) scale(1.03)';
+      el.style.left = x + 'px';
+      el.style.top  = y + 'px';
+      await sleep(300);
+      el.style.transform = 'translate(-50%,-50%) scale(1)';
+      await sleep(120);
+    }
+  }
+
+  async function animateJump(playerIndex, fromNum, toNum, type) {
+    const el = playerIndex === 0 ? tokenBlue : tokenRed;
+    const start = getCellCenter(fromNum);
+    const end   = getCellCenter(toNum);
+    showBurst((start.x + end.x) / 2, (start.y + end.y) / 2);
+    el.style.transform = 'translate(-50%,-70%) scale(1.08)';
+    el.style.left = end.x + 'px';
+    el.style.top  = end.y + 'px';
+    await sleep(520);
+    el.style.transform = 'translate(-50%,-50%) scale(1)';
+    await sleep(120);
+  }
+
+  function showBurst(x, y) {
+    burst.style.left = x + 'px';
+    burst.style.top  = y + 'px';
+    burst.style.opacity = '1';
+    burst.style.transform = 'translate(-50%,-50%) scale(1)';
+    setTimeout(() => {
+      burst.style.opacity = '0';
+      burst.style.transform = 'translate(-50%,-50%) scale(0.85)';
+    }, 480);
+  }
+
+  let rolling = false;
+
+  dice.addEventListener('click', async () => {
+    if (rolling) return;
+    if (positions[0] === 100 || positions[1] === 100) { alert('Game over. Reset to play again.'); return; }
+    if (mode === "cpu" && currentPlayer === 1) return;
+
+    rolling = true;
+    dice.classList.add('rolling');
+    setDiceColor(true);
+    diceVal.textContent = '...';
+    const result = Math.floor(Math.random() * 6) + 1;
+    await sleep(720);
+    diceVal.textContent = result;
+    dice.classList.remove('rolling');
+    rolling = false;
+
+    moves++;
+    movesCountEl.textContent = 'Moves: ' + moves;
+
+    await movePlayer(currentPlayer, result);
+
+    if (positions[currentPlayer] === 100) {
+      declareWinner(currentPlayer);
+      return;
+    }
+
+    currentPlayer = (currentPlayer + 1) % 2;
+    updateTurn();
+
+    if (mode === "cpu" && currentPlayer === 1) {
+      setTimeout(() => {
+        if (positions[0] < 100 && positions[1] < 100 && !rolling) {
+          cpuRoll();
+        }
+      }, 900);
+    }
+  });
+
+  async function cpuRoll(){
+    if (positions[0] === 100 || positions[1] === 100) return;
+    if (currentPlayer !== 1) return;
+    rolling = true;
+    dice.classList.add('rolling');
+    setDiceColor(true);
+    diceVal.textContent = '...';
+    await sleep(600);
+    const result = Math.floor(Math.random() * 6) + 1;
+    diceVal.textContent = result;
+    dice.classList.remove('rolling');
+    rolling = false;
+
+    moves++;
+    movesCountEl.textContent = 'Moves: ' + moves;
+
+    await movePlayer(1, result);
+
+    if (positions[1] === 100) { declareWinner(1); return; }
+
+    currentPlayer = 0;
+    updateTurn();
+  }
+
+  async function movePlayer(i, steps) {
+    const oldPos = positions[i];
+    const newPos = Math.min(100, oldPos + steps);
+    const path = [];
+    for (let n = oldPos + 1; n <= newPos; n++) path.push(n);
+    await animatePath(i, path);
+    positions[i] = newPos;
+    let text = `${i === 0 ? 'Blue' : 'Red'} rolled ${steps} → ${newPos}`;
+
+    if (LADDERS[newPos]) {
+      const dest = LADDERS[newPos];
+      text += ` ↑ climbed to ${dest}`;
+      await sleep(200);
+      await animateJump(i, newPos, dest, 'ladder');
+      positions[i] = dest;
+    } else if (SNAKES[newPos]) {
+      const dest = SNAKES[newPos];
+      text += ` ↓ slid to ${dest}`;
+      await sleep(200);
+      await animateJump(i, newPos, dest, 'snake');
+      positions[i] = dest;
+    }
+
+    log(text);
+    updateStats();
+    placeToken(i === 0 ? 'blue' : 'red', positions[i]);
+  }
+
+  function declareWinner(i) {
+    winnerBanner.style.display = 'block';
+    winnerBanner.textContent = `🏆 ${i === 0 ? 'Blue' : 'Red'} Wins!`;
+    showBurst(board.clientWidth / 2, board.clientHeight / 2);
+    addLog(`<b>${i === 0 ? 'Blue' : 'Red'} Wins! 🎉</b>`);
+  }
+
+  function updateTurn() {
+    turnName.textContent = currentPlayer === 0 ? 'Blue' : 'Red';
+    setDiceColor();
+  }
+
+  function updateStats() {
+    blueStat.textContent = `Blue: ${positions[0]}`;
+    redStat.textContent = `Red: ${positions[1]}`;
+  }
+
+  function log(t) {
+    if (logEl.textContent === 'No moves yet') logEl.textContent = '';
+    logEl.innerHTML = `<div>${t}</div>` + logEl.innerHTML;
+    logEl.scrollTop = 0;
+  }
+
+  function addLog(t) {
+    if (logEl.textContent === 'No moves yet') logEl.textContent = '';
+    logEl.innerHTML = `<div>${t}</div>` + logEl.innerHTML;
+  }
+
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  function setDiceColor(rollingFlag = false) {
+    dice.style.background = currentPlayer === 0
+      ? (rollingFlag ? 'linear-gradient(180deg,#60a5fa,#3b82f6)' : 'linear-gradient(180deg,#3b82f6,#2563eb)')
+      : (rollingFlag ? 'linear-gradient(180deg,#fca5a5,#fb7185)' : 'linear-gradient(180deg,#fb7185,#ef4444)');
+  }
+
+  resetBtn.onclick = () => {
+    positions = [0, 0];
+    currentPlayer = 0;
+    moves = 0;
+    winnerBanner.style.display = 'none';
+    updateStats(); updateTurn();
+    movesCountEl.textContent = 'Moves: 0';
+    logEl.textContent = 'No moves yet';
+    placeToken('blue', 0); placeToken('red', 0);
+    diceVal.textContent = '—';
+  };
+
+  document.getElementById('copyBtn').addEventListener('click', () => {
+    navigator.clipboard.writeText('4770632');
+    alert('Till number copied: 4770632');
+  });
+
+  window.addEventListener('load', () => { placeToken('blue', positions[0]); placeToken('red', positions[1]); });
+  window.addEventListener('resize', () => { placeToken('blue', positions[0]); placeToken('red', positions[1]); });
+
+</script>
+
+
+</body>
+</html>
