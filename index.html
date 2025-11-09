@@ -142,7 +142,7 @@
       </div>
 
       <div class="board" id="board">
-        <img src="https://iili.io/KtnmDo7.jpg" alt="Snakes & Ladders board" id="boardImg" crossorigin="anonymous" />
+        <img src="./snakes.jpg" alt="Snakes & Ladders board" id="boardImg" crossorigin="anonymous" />
         <div id="grid" class="grid"></div>
         <div id="token-blue" class="token blue"><div class="label">B</div></div>
         <div id="token-red" class="token red"><div class="label">R</div></div>
@@ -473,8 +473,22 @@
     alert('Till number copied: 4770632');
   });
 
-  window.addEventListener('load', () => { placeToken('blue', positions[0]); placeToken('red', positions[1]); });
-  window.addEventListener('resize', () => { placeToken('blue', positions[0]); placeToken('red', positions[1]); });
+  window.addEventListener('load', () => { 
+    placeToken('blue', positions[0]); 
+    placeToken('red', positions[1]); 
+    
+    // Register service worker for offline support
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(() => console.log('SW registered'))
+        .catch(() => console.log('SW registration failed'));
+    }
+  });
+  
+  window.addEventListener('resize', () => { 
+    placeToken('blue', positions[0]); 
+    placeToken('red', positions[1]); 
+  });
 
 </script>
 
