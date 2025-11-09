@@ -1,0 +1,22 @@
+{
+  "name": "Snakes & Ladders",
+  "short_name": "Snakes&Ladders",
+  "description": "A modern Snakes & Ladders game",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#071026",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "favicon1.jpeg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "favicon1.jpeg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}
