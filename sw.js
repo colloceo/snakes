@@ -1,34 +1,26 @@
-const CACHE_NAME = 'snakes-ladders-v2';
+const CACHE_NAME = 'snakes-ladders-v3';
 const urlsToCache = [
-  './',
-  './index.html',
-  './snakes.jpg',
-  './favicon1.jpeg',
-  './manifest.json'
+  '/snakes/',
+  '/snakes/index.html',
+  '/snakes/snakes.jpg',
+  '/snakes/favicon1.jpeg',
+  '/snakes/manifest.json'
 ];
 
-// Install event - cache resources
 self.addEventListener('install', event => {
-  console.log('Service Worker installing...');
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('Caching app shell');
-        return cache.addAll(urlsToCache);
-      })
+      .then(cache => cache.addAll(urlsToCache))
       .then(() => self.skipWaiting())
   );
 });
 
-// Activate event - clean up old caches
 self.addEventListener('activate', event => {
-  console.log('Service Worker activating...');
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
           if (cacheName !== CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
@@ -37,23 +29,15 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        // Return cached version or fetch from network
         return response || fetch(event.request).catch(() => {
-          // If both cache and network fail, return offline page
           if (event.request.destination === 'document') {
-            return caches.match('./index.html');
+            return caches.match('/snakes/index.html');
           }
         });
       })
   );
-});
-
-// Background sync for offline actions
-self.addEventListener('sync', event => {
-  console.log('Background sync triggered');
 });

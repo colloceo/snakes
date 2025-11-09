@@ -479,7 +479,7 @@
     
     // Register service worker for offline support
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js')
+      navigator.serviceWorker.register('/snakes/sw.js')
         .then(registration => {
           console.log('SW registered successfully:', registration.scope);
         })
