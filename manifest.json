@@ -4,7 +4,7 @@
   "description": "A modern Snakes & Ladders game - Play offline!",
   "start_url": "/snakes/",
   "scope": "/snakes/",
-  "id": "/snakes/",
+  "id": "snakes-ladders-game",
   "display": "standalone",
   "background_color": "#071026",
   "theme_color": "#3b82f6",
@@ -14,15 +14,16 @@
   "icons": [
     {
       "src": "/snakes/favicon1.jpeg",
-      "sizes": "192x192",
+      "sizes": "500x500",
       "type": "image/jpeg",
       "purpose": "any"
-    },
+    }
+  ],
+  "screenshots": [
     {
       "src": "/snakes/favicon1.jpeg",
-      "sizes": "512x512",
-      "type": "image/jpeg",
-      "purpose": "maskable"
+      "sizes": "500x500",
+      "type": "image/jpeg"
     }
   ]
 }
