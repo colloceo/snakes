@@ -25,5 +25,17 @@
       "sizes": "500x500",
       "type": "image/jpeg"
     }
-  ]
+  ],
+  "shortcuts": [
+    {
+      "name": "New Game",
+      "short_name": "New Game",
+      "description": "Start a new Snakes & Ladders game",
+      "url": "/snakes/",
+      "icons": [{ "src": "/snakes/favicon1.jpeg", "sizes": "500x500" }]
+    }
+  ],
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  }
 }
